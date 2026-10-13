@@ -2,6 +2,7 @@
 
 mod args;
 mod config;
+mod names;
 mod zed_env;
 
 fn main() {}
