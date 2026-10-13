@@ -30,16 +30,27 @@ pub fn enable_dpi_awareness() {
     }
 }
 
+/// 失敗のメッセージ窓に出すアイコン（build.rs で埋めた、色違いの pon）の名前 ID。
+const ERROR_ICON_ID: u16 = 2;
+
 pub fn message_box(text: &str) {
     let text = wide(text);
     let title = wide("pon");
     unsafe {
-        MessageBoxW(
-            GetForegroundWindow(),
-            text.as_ptr(),
-            title.as_ptr(),
-            MB_OK | MB_ICONERROR | MB_SETFOREGROUND,
-        );
+        let params = MSGBOXPARAMSW {
+            cbSize: std::mem::size_of::<MSGBOXPARAMSW>() as u32,
+            hwndOwner: GetForegroundWindow(),
+            hInstance: GetModuleHandleW(std::ptr::null()),
+            lpszText: text.as_ptr(),
+            lpszCaption: title.as_ptr(),
+            // 標準の「×」の代わりに色違いの pon。MB_USERICON は警告音も鳴らさない。
+            dwStyle: MB_OK | MB_USERICON | MB_SETFOREGROUND,
+            lpszIcon: ERROR_ICON_ID as usize as *const u16,
+            dwContextHelpId: 0,
+            lpfnMsgBoxCallback: None,
+            dwLanguageId: 0,
+        };
+        MessageBoxIndirectW(&params);
     }
 }
 

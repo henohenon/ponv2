@@ -10,7 +10,7 @@ blog（ブログ、`!/{slug}/!.md`）と notes（メモ、md 平置き）の両�
 - **速さを最優先**。押してから結果まで 1 桁〜十数 ms を狙う。途中で pwsh・PowerShell・ターミナルの窓を立ち上げない。
 - **Rust、単一 exe `pon`、コンソール無し（windows subsystem）**。
   - 起動時に `AttachConsole(ATTACH_PARENT_PROCESS)` を試み、ターミナルから呼ばれたときだけ標準出力に結果を書く。
-  - 失敗の通知は常に小さなメッセージ窓。成功は無言。
+  - 失敗の通知は常に小さなメッセージ窓（アイコンは標準の「×」ではなく色違いの pon、`assets/icon-error.*`。警告音も鳴らない）。成功は無言。
 - **Zed のタスクからしか呼ばれない前提**（Stream Deck からも同じ exe）。人が CLI から打つ用途の UX は作らない。
 - 入力は Zed がタスクに渡す環境変数 `ZED_FILE` `ZED_ROW` `ZED_COLUMN` `ZED_SELECTED_TEXT` と、サブコマンドの引数だけ。
 
@@ -113,7 +113,7 @@ System → Open の path 欄に exe と引数を直接書く。`.vbs` も `.lnk`
 
 - `cargo install --path .` で `pon.exe`（cargo home は `%CARGO_HOME%`）。PATH 済みなのでタスクは `pon` と書くだけ。
 - release はサイズと起動を優先（`opt-level`、`lto`、`panic = "abort"`、`strip`）。
-- exe のアイコンに `assets/icon.ico` を埋める。
+- exe のアイコンに `assets/icon.ico` を埋める。失敗窓のアイコン `assets/icon-error.ico` も ID 2 で埋める（`icon-error.svg` は `icon.svg` の色違いで、小さく出るので余白を詰めてある。ico は 16〜256px の PNG 入り）。
 
 ## 止まる条件（まとめ）
 
