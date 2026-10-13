@@ -20,7 +20,7 @@ impl ZedEnv {
 
     pub fn read(get: impl Fn(&str) -> Option<String>) -> Self {
         Self {
-            file: get("ZED_FILE").map(PathBuf::from),
+            file: get("ZED_FILE").filter(|s| !s.is_empty()).map(PathBuf::from),
             row: get("ZED_ROW").and_then(|s| s.parse().ok()),
             column: get("ZED_COLUMN").and_then(|s| s.parse().ok()),
             selected: get("ZED_SELECTED_TEXT").unwrap_or_default(),
@@ -66,6 +66,7 @@ mod tests {
     fn 無ければ_none_と空() {
         assert_eq!(env(&[]), ZedEnv::default());
         assert_eq!(env(&[("ZED_ROW", "abc")]).row, None);
+        assert_eq!(env(&[("ZED_FILE", "")]).file, None);
     }
 
     #[test]
