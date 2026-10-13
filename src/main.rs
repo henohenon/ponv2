@@ -3,6 +3,7 @@
 mod args;
 mod config;
 mod names;
+mod rename;
 mod zed_env;
 
 fn main() {}
