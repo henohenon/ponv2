@@ -1,4 +1,8 @@
-<svg width="256" height="256" viewBox="29 24 210 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- 失敗の窓用：赤い三角の中に白い pon。-->
+<path d="M128 20L244 232H12Z" fill="#FF3B5C" stroke="#FF3B5C" stroke-width="20" stroke-linejoin="round"/>
+<g transform="translate(26 44) scale(0.8)">
 <circle cx="91" cy="214" r="13" fill="#5932FF"/>
-<path d="M91 178V128M91 128V46C91 45.4477 91.4477 45 92 45H176C176.552 45 177 45.4477 177 46V101.586C177 101.851 176.895 102.105 176.707 102.293L151.293 127.707C151.105 127.895 150.851 128 150.586 128H91Z M151 128V102.05C151 102.022 151.022 102 151.05 102H177" stroke="#FF5C7A" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M91 178V128M91 128V46C91 45.4477 91.4477 45 92 45H176C176.552 45 177 45.4477 177 46V101.586C177 101.851 176.895 102.105 176.707 102.293L151.293 127.707C151.105 127.895 150.851 128 150.586 128H91Z M151 128V102.05C151 102.022 151.022 102 151.05 102H177" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
 </svg>
