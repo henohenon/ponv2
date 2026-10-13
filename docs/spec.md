@@ -111,7 +111,7 @@ System → Open の path 欄に exe と引数を直接書く。`.vbs` も `.lnk`
 
 ## ビルドと配置
 
-- `cargo install --path .` で `pon.exe`。PATH 済みなのでタスクは `pon` と書くだけ。
+- `cargo install --path .` で `pon.exe`（cargo home は `%CARGO_HOME%`）。PATH 済みなのでタスクは `pon` と書くだけ。
 - release はサイズと起動を優先（`opt-level`、`lto`、`panic = "abort"`、`strip`）。
 - exe のアイコンに `assets/icon.ico` を埋める。
 
