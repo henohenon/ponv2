@@ -31,7 +31,7 @@ impl ZedEnv {
     pub fn md_file(&self) -> Result<&Path> {
         let Some(file) = self.file.as_deref() else {
             // Zed はファイル単体で開いているとき、タスクに ZED_FILE を渡さない（フォルダとして開いたプロジェクトだけ）。
-            bail!("編集中ノ ファイルガ 分カリマセン。Zed デ フォルダヲ 開イテカラ 使ッテクダサイ。（ZED_FILE ガ アリマセン）")
+            bail!("編集中ノ ファイルガ 分カリマセン。Zed ノ タスクカラ 呼ンデクダサイ。（ZED_FILE ガ ナク、Zed ノ 状態モ 読メマセン）")
         };
         if !file.extension().is_some_and(|e| e.eq_ignore_ascii_case("md")) {
             bail!("Markdown デハ アリマセン：{}", file.display());
@@ -40,9 +40,43 @@ impl ZedEnv {
     }
 }
 
+/// Zed のタスクが置く目印（tasks.json の env）。これがあるときだけ、状態 DB で補ってよい。
+pub const FROM_ZED: &str = "PON_FROM_ZED";
+
+/// Zed が渡した値があればそれ。無く、Zed のタスクから呼ばれていれば `fallback`（状態 DB）で補う。
+/// Stream Deck などからは補わない（たまたま前面にある Zed の選択を拾わないため）。
+pub fn choose(from_env: ZedEnv, from_zed: bool, fallback: impl FnOnce() -> Option<ZedEnv>) -> ZedEnv {
+    if from_env.file.is_some() || !from_zed {
+        return from_env;
+    }
+    fallback().unwrap_or(from_env)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn with_file() -> ZedEnv {
+        ZedEnv { file: Some("D:/x/!.md".into()), ..Default::default() }
+    }
+
+    #[test]
+    fn zed_が渡したならそれを使い_状態_db_は読まない() {
+        let env = choose(with_file(), true, || panic!("読まない"));
+        assert_eq!(env, with_file());
+    }
+
+    #[test]
+    fn zed_のタスクから呼ばれて何も渡っていなければ状態_db_で補う() {
+        let env = choose(ZedEnv::default(), true, || Some(with_file()));
+        assert_eq!(env, with_file());
+    }
+
+    #[test]
+    fn zed_のタスク以外_stream_deck_などからは状態_db_を読まない() {
+        let env = choose(ZedEnv::default(), false, || panic!("読まない"));
+        assert_eq!(env, ZedEnv::default());
+    }
     use std::collections::HashMap;
 
     fn env(pairs: &[(&str, &str)]) -> ZedEnv {

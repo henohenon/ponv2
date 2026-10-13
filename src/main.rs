@@ -14,6 +14,7 @@ mod rename;
 mod win;
 mod zed;
 mod zed_env;
+mod zed_state;
 
 use std::io::Write;
 
@@ -23,7 +24,12 @@ fn main() {
     win::attach_parent_console();
     win::enable_dpi_awareness();
     let argv: Vec<String> = std::env::args().skip(1).collect();
-    let env = zed_env::ZedEnv::from_env();
+    // フォルダで開いた Zed はタスクに ZED_FILE などを渡す。ファイル単体だと渡さないので、状態 DB で補う。
+    let env = zed_env::choose(
+        zed_env::ZedEnv::from_env(),
+        std::env::var_os(zed_env::FROM_ZED).is_some(),
+        zed_state::current,
+    );
     let stamp = chrono::Local::now().format("%Y-%m-%dT%H:%M:%S%.3f").to_string();
     let result = run(&argv, &env);
     let (code, outcome) = match &result {

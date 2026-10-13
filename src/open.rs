@@ -27,14 +27,12 @@ pub fn run(
     env: &ZedEnv,
     ask: impl FnOnce() -> Option<String>,
 ) -> Result<String> {
-    let (root, path) = prepare_with_root(name, today, project, env, ask)?;
-    // フォルダも渡す。ファイルだけだと Zed が「ファイル 1 つのワークスペース」にして、タスクに ZED_FILE を渡さなくなる。
-    crate::zed::open(&root, &path)?;
+    let path = prepare(name, today, project, env, ask)?;
+    crate::zed::open(&path)?;
     Ok(path.display().to_string())
 }
 
 /// 名前とプロジェクトを決め、規則に当て、無ければ作る。開くのは呼ぶ側。
-#[cfg(test)]
 pub fn prepare(
     name: Option<String>,
     today: bool,
@@ -42,17 +40,6 @@ pub fn prepare(
     env: &ZedEnv,
     ask: impl FnOnce() -> Option<String>,
 ) -> Result<PathBuf> {
-    prepare_with_root(name, today, project, env, ask).map(|(_, path)| path)
-}
-
-/// `prepare` と同じだが、プロジェクトのフォルダ（pon.toml のある所）も返す。
-pub fn prepare_with_root(
-    name: Option<String>,
-    today: bool,
-    project: Option<PathBuf>,
-    env: &ZedEnv,
-    ask: impl FnOnce() -> Option<String>,
-) -> Result<(PathBuf, PathBuf)> {
     let root = decide_root(project, env)?;
     let found = config::find(&root)?.expect("decide_root が pon.toml を確かめている");
     let name = decide_name(name, today, env, ask)?;
@@ -60,7 +47,7 @@ pub fn prepare_with_root(
         bail!("「{name}」ニ 合ウ 規則ガ pon.toml ニ アリマセン。");
     };
     let (path, _created) = pages::ensure(&found.root, &resolved)?;
-    Ok((found.root, path))
+    Ok(path)
 }
 
 fn decide_name(
@@ -149,11 +136,10 @@ mod tests {
     }
 
     #[test]
-    fn 開くときはプロジェクトのフォルダも返す() {
+    fn サブフォルダを指してもプロジェクトのルートの規則で作る() {
         let t = project();
-        let (root, path) =
-            prepare_with_root(Some("neko".into()), false, Some(t.path().join("sub")), &ZedEnv::default(), || None).unwrap();
-        assert_eq!(root, t.path());
+        std::fs::create_dir_all(t.path().join("sub")).unwrap();
+        let path = prepare(Some("neko".into()), false, Some(t.path().join("sub")), &ZedEnv::default(), || None).unwrap();
         assert_eq!(path, t.path().join("neko.md"));
     }
 

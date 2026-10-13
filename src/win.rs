@@ -187,6 +187,38 @@ pub fn input_box(title: &str) -> Option<String> {
     }
 }
 
+/// 前面の窓が Zed（Zed.exe）なら、そのタイトル。違えば None。
+pub fn foreground_zed_title() -> Option<String> {
+    use windows_sys::Win32::Foundation::CloseHandle;
+    use windows_sys::Win32::System::Threading::{
+        OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION,
+    };
+    unsafe {
+        let hwnd = GetForegroundWindow();
+        if hwnd.is_null() {
+            return None;
+        }
+        let mut pid = 0u32;
+        GetWindowThreadProcessId(hwnd, &mut pid);
+        let process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
+        if process.is_null() {
+            return None;
+        }
+        let mut buf = vec![0u16; 1024];
+        let mut len = buf.len() as u32;
+        let ok = QueryFullProcessImageNameW(process, PROCESS_NAME_WIN32, buf.as_mut_ptr(), &mut len);
+        CloseHandle(process);
+        if ok == 0 {
+            return None;
+        }
+        let exe = String::from_utf16_lossy(&buf[..len as usize]);
+        if !exe.to_ascii_lowercase().ends_with("\\zed.exe") {
+            return None;
+        }
+        Some(window_text(hwnd))
+    }
+}
+
 unsafe fn window_text(hwnd: HWND) -> String {
     unsafe {
         let len = GetWindowTextLengthW(hwnd) as usize;
