@@ -9,6 +9,8 @@ mod names;
 mod pages;
 mod paste;
 mod rename;
+mod win;
+mod zed;
 mod zed_env;
 
 fn main() {}
