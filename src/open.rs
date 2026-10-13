@@ -34,6 +34,7 @@ pub fn run(
 }
 
 /// 名前とプロジェクトを決め、規則に当て、無ければ作る。開くのは呼ぶ側。
+#[cfg(test)]
 pub fn prepare(
     name: Option<String>,
     today: bool,
