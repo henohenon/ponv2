@@ -8,6 +8,18 @@ use crate::config;
 use crate::pages;
 use crate::zed_env::ZedEnv;
 
+/// 名前の入力窓を Esc・×・空の Enter で閉じた。失敗ではないので、窓を出さずに終わる。
+#[derive(Debug)]
+pub struct Cancelled;
+
+impl std::fmt::Display for Cancelled {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("キャンセル")
+    }
+}
+
+impl std::error::Error for Cancelled {}
+
 pub fn run(
     name: Option<String>,
     today: bool,
@@ -56,7 +68,7 @@ fn decide_name(
     }
     match ask() {
         Some(n) => Ok(n),
-        None => bail!("名前ヲ 入力シテクダサイ。"),
+        None => Err(Cancelled.into()),
     }
 }
 
@@ -101,7 +113,8 @@ mod tests {
         assert_eq!(p, "neko");
         let p = decide_name(None, false, &env_none, || Some("asked".into())).unwrap();
         assert_eq!(p, "asked");
-        assert!(decide_name(None, false, &env_none, || None).is_err());
+        let e = decide_name(None, false, &env_none, || None).unwrap_err();
+        assert!(e.downcast_ref::<Cancelled>().is_some(), "入力窓を閉じたらキャンセル扱い（失敗の窓を出さない）");
     }
 
     #[test]
