@@ -5,6 +5,7 @@ use std::ptr::null_mut;
 use windows_sys::Win32::Foundation::{HWND, LPARAM, LRESULT, RECT, WPARAM};
 use windows_sys::Win32::Graphics::Gdi::{CreateFontIndirectW, COLOR_WINDOW};
 use windows_sys::Win32::System::Console::{AttachConsole, ATTACH_PARENT_PROCESS};
+use windows_sys::Win32::System::Diagnostics::Debug::MessageBeep;
 use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows_sys::Win32::UI::HiDpi::{
     AdjustWindowRectExForDpi, GetDpiForSystem, SetProcessDpiAwarenessContext,
@@ -37,6 +38,8 @@ pub fn message_box(text: &str) {
     let text = wide(text);
     let title = wide("pon");
     unsafe {
+        // MB_USERICON は警告音を鳴らさないので、自分で鳴らす。
+        MessageBeep(MB_ICONERROR);
         let params = MSGBOXPARAMSW {
             cbSize: std::mem::size_of::<MSGBOXPARAMSW>() as u32,
             hwndOwner: GetForegroundWindow(),

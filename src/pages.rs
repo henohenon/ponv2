@@ -17,7 +17,7 @@ pub struct Resolved {
 pub fn resolve(config: &Config, name: &str) -> Result<Option<Resolved>> {
     for page in &config.pages {
         let re = Regex::new(&page.pattern)
-            .with_context(|| format!("pon.toml の match が壊れている: {}", page.pattern))?;
+            .with_context(|| format!("pon.toml の match が読めないよ：{}", page.pattern))?;
         let Some(caps) = re.captures(name) else { continue };
         let mut rel_path = String::new();
         caps.expand(&page.path, &mut rel_path);
@@ -32,7 +32,7 @@ pub fn resolve(config: &Config, name: &str) -> Result<Option<Resolved>> {
 pub fn target_path(root: &Path, rel: &str) -> Result<PathBuf> {
     let rel = Path::new(rel);
     if rel.is_absolute() || rel.has_root() {
-        bail!("パスは相対で書く: {}", rel.display());
+        bail!("パスは相対で書いてね：{}", rel.display());
     }
     let mut depth = 0usize;
     for c in rel.components() {
@@ -41,11 +41,11 @@ pub fn target_path(root: &Path, rel: &str) -> Result<PathBuf> {
             Component::CurDir => {}
             Component::ParentDir => {
                 if depth == 0 {
-                    bail!("プロジェクトの外に出るパス: {}", rel.display());
+                    bail!("プロジェクトの外に出ちゃうパスだよ：{}", rel.display());
                 }
                 depth -= 1;
             }
-            Component::Prefix(_) | Component::RootDir => bail!("パスは相対で書く: {}", rel.display()),
+            Component::Prefix(_) | Component::RootDir => bail!("パスは相対で書いてね：{}", rel.display()),
         }
     }
     Ok(root.join(rel))
@@ -60,7 +60,7 @@ pub fn ensure(root: &Path, resolved: &Resolved) -> Result<(PathBuf, bool)> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
-    fs::write(&path, &resolved.template).with_context(|| format!("{} を作れない", path.display()))?;
+    fs::write(&path, &resolved.template).with_context(|| format!("{} を作れなかった", path.display()))?;
     Ok((path, true))
 }
 

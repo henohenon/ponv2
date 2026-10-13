@@ -40,23 +40,23 @@ pub fn find_pairs(text: &str) -> Vec<Pair> {
 pub fn resolve(pair: &Pair, exists: impl Fn(&str) -> bool) -> Result<Plan> {
     let (a_exists, b_exists) = (exists(&pair.a), exists(&pair.b));
     if a_exists && b_exists {
-        bail!("{} と {} の両方が既にある。どちらを改名するのか決められない", pair.a, pair.b);
+        bail!("{} と {} の両方が既にあるよ。どっちを変えればいいか分からない", pair.a, pair.b);
     }
     if !a_exists && !b_exists {
-        bail!("{} も {} も見つからない", pair.a, pair.b);
+        bail!("{} も {} も見つからないよ", pair.a, pair.b);
     }
     let (old_name, candidate) = if a_exists { (&pair.a, &pair.b) } else { (&pair.b, &pair.a) };
     let (_, ext) = split_ext(old_name);
     let (stem, cand_ext) = split_ext(candidate);
     if !cand_ext.is_empty() && cand_ext != ext {
-        bail!("拡張子が違う（{candidate} ← {old_name}）。形式の変換はしない");
+        bail!("拡張子が違うよ（{candidate} ← {old_name}）。形式は変えられないの");
     }
     if !is_valid_stem(stem) {
-        bail!("使える文字は英数字と - _ だけ: {stem}");
+        bail!("使える文字は英数字と - _ だけだよ：{stem}");
     }
     let new_name = format!("{stem}{ext}");
     if exists(&new_name) {
-        bail!("{new_name} は既にある");
+        bail!("{new_name} は既にあるよ");
     }
     Ok(Plan { old_name: old_name.clone(), new_name })
 }
@@ -94,7 +94,7 @@ pub fn run_with(env: &ZedEnv, cfg: Option<&Config>) -> Result<String> {
     };
     let pairs = find_pairs(&target);
     if pairs.is_empty() {
-        bail!("この行に `![](新しい名前,今の名前)` の形が無い");
+        bail!("この行に `![](新しい名前,今の名前)` の形が無いよ");
     }
 
     let dest_dir = images::dir(cfg, md);
@@ -103,10 +103,10 @@ pub fn run_with(env: &ZedEnv, cfg: Option<&Config>) -> Result<String> {
     let mut seen = HashSet::new();
     for plan in &plans {
         if !seen.insert(&plan.new_name) {
-            bail!("同じ新しい名前が 2 回出てくる: {}", plan.new_name);
+            bail!("同じ新しい名前が 2 回出てきたよ：{}", plan.new_name);
         }
         if dest_dir.join(&plan.new_name).exists() {
-            bail!("{} は既にある", dest_dir.join(&plan.new_name).display());
+            bail!("{} は既にあるよ", dest_dir.join(&plan.new_name).display());
         }
     }
 

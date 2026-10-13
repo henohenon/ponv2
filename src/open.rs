@@ -32,7 +32,7 @@ pub fn prepare(
     let found = config::find(&root)?.expect("decide_root が pon.toml を確かめている");
     let name = decide_name(name, today, env, ask)?;
     let Some(resolved) = pages::resolve(&found.config, &name)? else {
-        bail!("「{name}」に当たる規則が pon.toml に無い");
+        bail!("「{name}」に合う規則が pon.toml に無いよ");
     };
     let (path, _created) = pages::ensure(&found.root, &resolved)?;
     Ok(path)
@@ -56,7 +56,7 @@ fn decide_name(
     }
     match ask() {
         Some(n) => Ok(n),
-        None => bail!("名前が無い"),
+        None => bail!("名前を教えてね"),
     }
 }
 
@@ -68,7 +68,7 @@ fn decide_root(project: Option<PathBuf>, env: &ZedEnv) -> Result<PathBuf> {
     };
     match config::find(&start)? {
         Some(found) => Ok(found.root),
-        None => bail!("{} から上に pon.toml が無い", start.display()),
+        None => bail!("{} から上に pon.toml が見つからないよ", start.display()),
     }
 }
 

@@ -20,18 +20,18 @@ fn raw_png() -> Result<Option<Vec<u8>>> {
     if !is_format_avail(fmt.get()) {
         return Ok(None);
     }
-    let _clip = Clipboard::new_attempts(10).map_err(|e| anyhow!("クリップボードを開けない: {e}"))?;
+    let _clip = Clipboard::new_attempts(10).map_err(|e| anyhow!("クリップボードを開けなかった：{e}"))?;
     let mut buf = Vec::new();
-    raw::get_vec(fmt.get(), &mut buf).map_err(|e| anyhow!("クリップボードを読めない: {e}"))?;
+    raw::get_vec(fmt.get(), &mut buf).map_err(|e| anyhow!("クリップボードを読めなかった：{e}"))?;
     Ok(if buf.is_empty() { None } else { Some(buf) })
 }
 
 fn dib_as_png() -> Result<Vec<u8>> {
-    let mut cb = arboard::Clipboard::new().context("クリップボードを開けない")?;
+    let mut cb = arboard::Clipboard::new().context("クリップボードを開けなかった")?;
     let img = match cb.get_image() {
         Ok(img) => img,
-        Err(arboard::Error::ContentNotAvailable) => return Err(anyhow!("クリップボードに画像が無い")),
-        Err(e) => return Err(anyhow!("クリップボードを読めない: {e}")),
+        Err(arboard::Error::ContentNotAvailable) => return Err(anyhow!("クリップボードに画像が無いよ")),
+        Err(e) => return Err(anyhow!("クリップボードを読めなかった：{e}")),
     };
     let mut out = Vec::new();
     {
@@ -40,8 +40,8 @@ fn dib_as_png() -> Result<Vec<u8>> {
         enc.set_depth(png::BitDepth::Eight);
         // 速さ優先。ビルド側が webp に変換し直すので、ここで縮めても意味が薄い。
         enc.set_compression(png::Compression::Fast);
-        let mut w = enc.write_header().context("PNG のヘッダを書けない")?;
-        w.write_image_data(&img.bytes).context("PNG を書けない")?;
+        let mut w = enc.write_header().context("PNG のヘッダを書けなかった")?;
+        w.write_image_data(&img.bytes).context("PNG を書けなかった")?;
     }
     Ok(out)
 }

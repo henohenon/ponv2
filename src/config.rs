@@ -39,7 +39,7 @@ pub struct Found {
 
 impl Config {
     pub fn parse(text: &str) -> Result<Config> {
-        toml::from_str(text).context("pon.toml を読めない")
+        toml::from_str(text).context("pon.toml が読めなかった")
     }
 }
 
@@ -50,7 +50,7 @@ pub fn find(start: &Path) -> Result<Option<Found>> {
         let file = d.join("pon.toml");
         if file.is_file() {
             let text = std::fs::read_to_string(&file)
-                .with_context(|| format!("{} を読めない", file.display()))?;
+                .with_context(|| format!("{} が読めなかった", file.display()))?;
             let config = Config::parse(&text).with_context(|| format!("{}", file.display()))?;
             return Ok(Some(Found { root: d.to_path_buf(), config }));
         }
