@@ -30,10 +30,10 @@ impl ZedEnv {
     /// 編集中の Markdown。Zed のタスクから呼ばれていなければ Err。
     pub fn md_file(&self) -> Result<&Path> {
         let Some(file) = self.file.as_deref() else {
-            bail!("Zed のタスクから呼んでね（ZED_FILE が無いよ）")
+            bail!("ZED_FILE ガ アリマセン。Zed ノ タスクカラ キドウ シテクダサイ。")
         };
         if !file.extension().is_some_and(|e| e.eq_ignore_ascii_case("md")) {
-            bail!("Markdown のファイルで使ってね：{}", file.display());
+            bail!("Markdown デハ アリマセン：{}", file.display());
         }
         Ok(file)
     }

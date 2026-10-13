@@ -13,9 +13,9 @@ pub fn open(path: &Path) -> Result<()> {
         .arg(path)
         .creation_flags(CREATE_NO_WINDOW)
         .status()
-        .context("zed を起動できなかった（PATH に zed が無いかも）")?;
+        .context("zed ヲ キドウ デキマセン。（PATH ニ zed ガ アリマセン）")?;
     if !status.success() {
-        bail!("zed が失敗しちゃった：{status}");
+        bail!("zed ガ シッパイ シマシタ：{status}");
     }
     Ok(())
 }

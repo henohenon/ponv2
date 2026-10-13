@@ -19,12 +19,12 @@ pub fn run(env: &ZedEnv) -> Result<String> {
 
 pub fn run_with(env: &ZedEnv, cfg: Option<&Config>, png: &[u8]) -> Result<String> {
     if png.is_empty() {
-        bail!("クリップボードに画像が無いよ");
+        bail!("ガゾウガ ミツカリマセン。");
     }
     let md = env.md_file()?;
     let (row, column) = match (env.row, env.column) {
         (Some(r), Some(c)) => (r, c),
-        _ => bail!("カーソルの位置が分からないよ（ZED_ROW / ZED_COLUMN が無い）"),
+        _ => bail!("カーソル イチガ フメイ デス。（ZED_ROW / ZED_COLUMN ガ アリマセン）"),
     };
     let content = fs::read_to_string(md)?;
 
@@ -37,7 +37,7 @@ pub fn run_with(env: &ZedEnv, cfg: Option<&Config>, png: &[u8]) -> Result<String
     };
     let dest = dest_dir.join(&name);
     if dest.exists() {
-        bail!("{} は既にあるよ", dest.display());
+        bail!("{} ハ スデニ アリマス。", dest.display());
     }
     let link = images::link_for(md, &dest)?;
     let out = markdown::insert_at(&content, row, column, replace, &format!("![]({link})"))?;
@@ -129,6 +129,6 @@ mod tests {
         let md = t.path().join("!.md");
         fs::write(&md, "\n").unwrap();
         let e = run_with(&env(md, 1, 1, ""), None, b"").unwrap_err();
-        assert!(e.to_string().contains("画像が無い"));
+        assert!(e.to_string().contains("ガゾウ"));
     }
 }
