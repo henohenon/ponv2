@@ -44,12 +44,15 @@ pub fn message_box(text: &str) {
         MessageBeep(MB_ICONERROR);
         let params = MSGBOXPARAMSW {
             cbSize: std::mem::size_of::<MSGBOXPARAMSW>() as u32,
-            hwndOwner: GetForegroundWindow(),
+            // 持ち主は付けない。持ち主を付けると、窓を閉じるまで持ち主（そのとき前面にある Zed や Chrome）が
+            // 操作不能になり、窓が後ろに隠れたり pon が落ちたりすると、その窓が触れないまま残る。
+            hwndOwner: null_mut(),
             hInstance: GetModuleHandleW(std::ptr::null()),
             lpszText: text.as_ptr(),
             lpszCaption: title.as_ptr(),
             // 標準の「×」の代わりに色違いの pon。MB_USERICON は警告音も鳴らさない。
-            dwStyle: MB_OK | MB_USERICON | MB_SETFOREGROUND,
+            // 持ち主が無いぶん、最前面に出して見失わないようにする。
+            dwStyle: MB_OK | MB_USERICON | MB_SETFOREGROUND | MB_TOPMOST,
             lpszIcon: ERROR_ICON_ID as usize as *const u16,
             dwContextHelpId: 0,
             lpfnMsgBoxCallback: None,
