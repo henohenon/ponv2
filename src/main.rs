@@ -2,6 +2,7 @@
 
 mod args;
 mod config;
+mod images;
 mod names;
 mod rename;
 mod zed_env;
