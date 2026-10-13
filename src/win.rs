@@ -31,6 +31,8 @@ pub fn enable_dpi_awareness() {
     }
 }
 
+/// exe 本体のアイコン（build.rs の set_icon、名前 ID は winresource の既定で 1）。入力窓に出す。
+const APP_ICON_ID: u16 = 1;
 /// 失敗のメッセージ窓に出すアイコン（build.rs で埋めた、色違いの pon）の名前 ID。
 const ERROR_ICON_ID: u16 = 2;
 
@@ -78,13 +80,14 @@ pub fn input_box(title: &str) -> Option<String> {
     unsafe {
         let hinst = GetModuleHandleW(std::ptr::null());
         let class = wide("pon-input");
+        let app_icon = LoadIconW(hinst, APP_ICON_ID as usize as *const u16);
         let wc = WNDCLASSW {
             style: CS_HREDRAW | CS_VREDRAW,
             lpfnWndProc: Some(wnd_proc),
             cbClsExtra: 0,
             cbWndExtra: 0,
             hInstance: hinst,
-            hIcon: null_mut(),
+            hIcon: app_icon,
             hCursor: LoadCursorW(null_mut(), IDC_ARROW),
             hbrBackground: (COLOR_WINDOW + 1) as usize as _,
             lpszMenuName: std::ptr::null(),
@@ -97,8 +100,9 @@ pub fn input_box(title: &str) -> Option<String> {
         let s = |v: i32| (v * dpi as i32 + 48) / 96;
         let (pad, edit_h) = (s(10), s(26));
         let (client_w, client_h) = (s(400), edit_h + pad * 2);
+        // タイトルバーに pon のアイコンを出すので、ツールウィンドウにはしない（所有窓なのでタスクバーには出ない）。
         let style = WS_POPUP | WS_CAPTION | WS_SYSMENU;
-        let ex_style = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
+        let ex_style = WS_EX_TOPMOST;
         let mut frame = RECT { left: 0, top: 0, right: client_w, bottom: client_h };
         AdjustWindowRectExForDpi(&mut frame, style, 0, ex_style, dpi);
         let (w, h) = (frame.right - frame.left, frame.bottom - frame.top);
@@ -128,6 +132,8 @@ pub fn input_box(title: &str) -> Option<String> {
         if hwnd.is_null() {
             return None;
         }
+        SendMessageW(hwnd, WM_SETICON, ICON_SMALL as usize, app_icon as isize);
+        SendMessageW(hwnd, WM_SETICON, ICON_BIG as usize, app_icon as isize);
         let edit_class = wide("EDIT");
         let edit = CreateWindowExW(
             WS_EX_CLIENTEDGE,
