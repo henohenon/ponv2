@@ -28,7 +28,7 @@ pub fn entry(stamp: &str, args: &[String], env: &ZedEnv, outcome: &str) -> Strin
 fn path() -> Option<PathBuf> {
     let dir = PathBuf::from(std::env::var_os("LOCALAPPDATA")?).join("pon");
     std::fs::create_dir_all(&dir).ok()?;
-    Some(dir.join("pon.log"))
+    Some(dir.join("pon-v2.log"))
 }
 
 pub fn write(line: &str) {
