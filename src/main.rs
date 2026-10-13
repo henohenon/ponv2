@@ -14,6 +14,8 @@ mod win;
 mod zed;
 mod zed_env;
 
+use std::io::Write;
+
 use args::Command;
 
 fn main() {
@@ -21,13 +23,15 @@ fn main() {
     win::enable_dpi_awareness();
     let code = match run() {
         Ok(msg) => {
-            println!("{msg}");
+            // コンソールが無い／閉じているときに println! が panic しないよう、失敗は捨てる。
+            let _ = writeln!(std::io::stdout(), "{msg}");
             0
         }
         Err(e) => {
+            // 失敗の通知はメッセージ窓が本命。コンソールへの書き出しは後回しにし、失敗しても構わない。
             let text = format!("{e:#}");
-            eprintln!("{text}");
             win::message_box(&text);
+            let _ = writeln!(std::io::stderr(), "{text}");
             1
         }
     };

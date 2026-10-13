@@ -3,11 +3,12 @@
 use std::ptr::null_mut;
 
 use windows_sys::Win32::Foundation::{HWND, LPARAM, LRESULT, RECT, WPARAM};
-use windows_sys::Win32::Graphics::Gdi::{GetStockObject, COLOR_WINDOW, DEFAULT_GUI_FONT};
+use windows_sys::Win32::Graphics::Gdi::{CreateFontIndirectW, COLOR_WINDOW};
 use windows_sys::Win32::System::Console::{AttachConsole, ATTACH_PARENT_PROCESS};
 use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows_sys::Win32::UI::HiDpi::{
-    SetProcessDpiAwarenessContext, DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2,
+    AdjustWindowRectExForDpi, GetDpiForSystem, SetProcessDpiAwarenessContext,
+    SystemParametersInfoForDpi, DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2,
 };
 use windows_sys::Win32::UI::Input::KeyboardAndMouse::{SetFocus, VK_ESCAPE, VK_RETURN};
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
@@ -77,8 +78,18 @@ pub fn input_box(title: &str) -> Option<String> {
         };
         RegisterClassW(&wc);
 
+        // DPI 対応を宣言しているので、寸法は 96dpi の値を画面の倍率で伸ばす。
+        let dpi = GetDpiForSystem();
+        let s = |v: i32| (v * dpi as i32 + 48) / 96;
+        let (pad, edit_h) = (s(10), s(26));
+        let (client_w, client_h) = (s(400), edit_h + pad * 2);
+        let style = WS_POPUP | WS_CAPTION | WS_SYSMENU;
+        let ex_style = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
+        let mut frame = RECT { left: 0, top: 0, right: client_w, bottom: client_h };
+        AdjustWindowRectExForDpi(&mut frame, style, 0, ex_style, dpi);
+        let (w, h) = (frame.right - frame.left, frame.bottom - frame.top);
+
         let owner = GetForegroundWindow();
-        let (w, h) = (420, 70);
         let (mut x, mut y) = (CW_USEDEFAULT, CW_USEDEFAULT);
         let mut r = RECT { left: 0, top: 0, right: 0, bottom: 0 };
         if !owner.is_null() && GetWindowRect(owner, &mut r) != 0 {
@@ -87,10 +98,10 @@ pub fn input_box(title: &str) -> Option<String> {
         }
         let title_w = wide(title);
         let hwnd = CreateWindowExW(
-            WS_EX_TOOLWINDOW | WS_EX_TOPMOST,
+            ex_style,
             class.as_ptr(),
             title_w.as_ptr(),
-            WS_POPUP | WS_CAPTION | WS_SYSMENU,
+            style,
             x,
             y,
             w,
@@ -109,16 +120,24 @@ pub fn input_box(title: &str) -> Option<String> {
             edit_class.as_ptr(),
             std::ptr::null(),
             WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL as u32,
-            10,
-            10,
-            w - 20,
-            26,
+            pad,
+            pad,
+            client_w - pad * 2,
+            edit_h,
             hwnd,
             null_mut(),
             hinst,
             std::ptr::null(),
         );
-        SendMessageW(edit, WM_SETFONT, GetStockObject(DEFAULT_GUI_FONT) as usize, 1);
+        // メッセージ用のシステムフォントを、この DPI の大きさで作る。
+        let mut ncm: NONCLIENTMETRICSW = std::mem::zeroed();
+        ncm.cbSize = std::mem::size_of::<NONCLIENTMETRICSW>() as u32;
+        if SystemParametersInfoForDpi(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &mut ncm as *mut _ as _, 0, dpi) != 0 {
+            let font = CreateFontIndirectW(&ncm.lfMessageFont);
+            if !font.is_null() {
+                SendMessageW(edit, WM_SETFONT, font as usize, 1);
+            }
+        }
         ShowWindow(hwnd, SW_SHOW);
         SetForegroundWindow(hwnd);
         SetFocus(edit);

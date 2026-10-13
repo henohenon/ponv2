@@ -542,6 +542,7 @@ dependencies = [
  "anyhow",
  "arboard",
  "chrono",
+ "clipboard-win",
  "pathdiff",
  "png",
  "regex",
