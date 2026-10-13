@@ -6,20 +6,24 @@ pub fn insert_at(content: &str, row: usize, column: usize, selected: &str, text:
     if row == 0 || column == 0 {
         bail!("行 マタハ 列ガ 0 デス。（1 カラ 数エマス）");
     }
+    // Zed は保存時に末尾の空行や行末の空白を削ることがある。カーソルの位置はその前の値なので、
+    // 行が足りなければ末尾に改行を足し、列がはみ出していれば行末に寄せる。
+    let newline = if content.contains("\r\n") { "\r\n" } else { "\n" };
+    let mut content = content.to_string();
     // 行の先頭のバイト位置を探す。
     let mut start = 0usize;
     for _ in 1..row {
         match content[start..].find('\n') {
             Some(i) => start += i + 1,
-            None => bail!("{row} 行目ガ アリマセン。"),
+            None => {
+                content.push_str(newline);
+                start = content.len();
+            }
         }
     }
     let line_end = content[start..].find('\n').map_or(content.len(), |i| start + i);
     let line_len = content[start..line_end].trim_end_matches('\r').len();
-    let col = column - 1;
-    if col > line_len {
-        bail!("{row} 行目ニ {column} 列ハ アリマセン。");
-    }
+    let col = (column - 1).min(line_len);
     let pos = start + col;
     if !content.is_char_boundary(pos) {
         bail!("{row} 行目 {column} 列ハ 文字ノ 途中デス。");
@@ -75,8 +79,16 @@ mod tests {
     }
 
     #[test]
-    fn 行がはみ出していれば_err() {
-        assert!(insert_at("ab\n", 3, 1, "", "X").is_err());
-        assert!(insert_at("ab\n", 1, 9, "", "X").is_err());
+    fn 保存で消えた末尾の行は足して入れる() {
+        // Zed は保存時に末尾の空行を削るので、カーソルの行がファイルより後ろになることがある。
+        assert_eq!(insert_at("ab\n", 3, 1, "", "X").unwrap(), "ab\n\nX");
+        assert_eq!(insert_at("ab", 3, 1, "", "X").unwrap(), "ab\n\nX");
+        assert_eq!(insert_at("ab\r\n", 3, 1, "", "X").unwrap(), "ab\r\n\r\nX");
+    }
+
+    #[test]
+    fn 保存で消えた行末の空白の分は行末に入れる() {
+        assert_eq!(insert_at("ab\n", 1, 9, "", "X").unwrap(), "abX\n");
+        assert_eq!(insert_at("ab\r\ncd\r\n", 1, 5, "", "X").unwrap(), "abX\r\ncd\r\n");
     }
 }
