@@ -19,20 +19,20 @@ pub enum Command {
 pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Command> {
     let mut it = args.into_iter();
     let Some(sub) = it.next() else {
-        bail!("コマンドヲ シテイ シテクダサイ。（paste / rename / open）")
+        bail!("コマンドヲ 指定シテクダサイ。（paste / rename / open）")
     };
     match sub.as_str() {
         "paste" => rest_is_empty(it, Command::Paste),
         "rename" => rest_is_empty(it, Command::Rename),
         "open" => parse_open(it),
-        other => bail!("フメイナ コマンド デス：{other}"),
+        other => bail!("不明ナ コマンドデス：{other}"),
     }
 }
 
 fn rest_is_empty(mut it: impl Iterator<Item = String>, cmd: Command) -> Result<Command> {
     match it.next() {
         None => Ok(cmd),
-        Some(extra) => bail!("ヨブンナ ヒキスウ デス：{extra}"),
+        Some(extra) => bail!("余分ナ 引数デス：{extra}"),
     }
 }
 
@@ -45,14 +45,14 @@ fn parse_open(mut it: impl Iterator<Item = String>) -> Result<Command> {
             "--today" => today = true,
             "--project" => {
                 let Some(dir) = it.next() else {
-                    bail!("--project ノ アトニ フォルダヲ シテイ シテクダサイ。")
+                    bail!("--project ノ 後ニ フォルダヲ 指定シテクダサイ。")
                 };
                 project = Some(PathBuf::from(dir));
             }
-            s if s.starts_with("--") => bail!("フメイナ ヒキスウ デス：{s}"),
+            s if s.starts_with("--") => bail!("不明ナ 引数デス：{s}"),
             s => {
                 if name.is_some() {
-                    bail!("ナマエガ 2ツ アリマス：{s}");
+                    bail!("名前ガ 2ツ アリマス：{s}");
                 }
                 name = Some(s.to_string());
             }

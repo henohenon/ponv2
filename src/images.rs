@@ -20,7 +20,7 @@ pub fn dir(config: Option<&Config>, md: &Path) -> PathBuf {
 pub fn link_for(md: &Path, image: &Path) -> Result<String> {
     let md_dir = md.parent().unwrap_or(Path::new("."));
     let Some(rel) = pathdiff::diff_paths(image, md_dir) else {
-        bail!("{} カラ {} ヘノ ソウタイ パスヲ ツクレマセン。", md_dir.display(), image.display())
+        bail!("{} カラ {} ヘノ 相対パスヲ 作レマセン。", md_dir.display(), image.display())
     };
     let parts: Vec<String> = rel
         .components()

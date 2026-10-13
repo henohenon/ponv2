@@ -4,25 +4,25 @@ use anyhow::{bail, Result};
 
 pub fn insert_at(content: &str, row: usize, column: usize, selected: &str, text: &str) -> Result<String> {
     if row == 0 || column == 0 {
-        bail!("ギョウ マタハ レツガ 0 デス。（1 カラ カゾエマス）");
+        bail!("行 マタハ 列ガ 0 デス。（1 カラ 数エマス）");
     }
     // 行の先頭のバイト位置を探す。
     let mut start = 0usize;
     for _ in 1..row {
         match content[start..].find('\n') {
             Some(i) => start += i + 1,
-            None => bail!("{row} ギョウメガ アリマセン。"),
+            None => bail!("{row} 行目ガ アリマセン。"),
         }
     }
     let line_end = content[start..].find('\n').map_or(content.len(), |i| start + i);
     let line_len = content[start..line_end].trim_end_matches('\r').len();
     let col = column - 1;
     if col > line_len {
-        bail!("{row} ギョウメニ {column} レツハ アリマセン。");
+        bail!("{row} 行目ニ {column} 列ハ アリマセン。");
     }
     let pos = start + col;
     if !content.is_char_boundary(pos) {
-        bail!("{row} ギョウメ {column} レツハ モジノ トチュウ デス。");
+        bail!("{row} 行目 {column} 列ハ 文字ノ 途中デス。");
     }
     let end = if !selected.is_empty() && content[pos..].starts_with(selected) {
         pos + selected.len()

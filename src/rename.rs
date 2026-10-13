@@ -40,23 +40,23 @@ pub fn find_pairs(text: &str) -> Vec<Pair> {
 pub fn resolve(pair: &Pair, exists: impl Fn(&str) -> bool) -> Result<Plan> {
     let (a_exists, b_exists) = (exists(&pair.a), exists(&pair.b));
     if a_exists && b_exists {
-        bail!("{} ト {} ガ リョウホウ アリマス。タイショウヲ トクテイ デキマセン。", pair.a, pair.b);
+        bail!("{} ト {} ガ 両方 アリマス。対象ヲ 特定デキマセン。", pair.a, pair.b);
     }
     if !a_exists && !b_exists {
-        bail!("{} モ {} モ ミツカリマセン。", pair.a, pair.b);
+        bail!("{} モ {} モ 見ツカリマセン。", pair.a, pair.b);
     }
     let (old_name, candidate) = if a_exists { (&pair.a, &pair.b) } else { (&pair.b, &pair.a) };
     let (_, ext) = split_ext(old_name);
     let (stem, cand_ext) = split_ext(candidate);
     if !cand_ext.is_empty() && cand_ext != ext {
-        bail!("カクチョウシガ チガイマス（{candidate} ← {old_name}）。ヘンカンハ シマセン。");
+        bail!("拡張子ガ 違イマス（{candidate} ← {old_name}）。変換ハ シマセン。");
     }
     if !is_valid_stem(stem) {
-        bail!("ツカエル モジハ エイスウジト - _ ノミ デス：{stem}");
+        bail!("使エル文字ハ 英数字ト - _ ノミデス：{stem}");
     }
     let new_name = format!("{stem}{ext}");
     if exists(&new_name) {
-        bail!("{new_name} ハ スデニ アリマス。");
+        bail!("{new_name} ハ 既ニ アリマス。");
     }
     Ok(Plan { old_name: old_name.clone(), new_name })
 }
@@ -94,7 +94,7 @@ pub fn run_with(env: &ZedEnv, cfg: Option<&Config>) -> Result<String> {
     };
     let pairs = find_pairs(&target);
     if pairs.is_empty() {
-        bail!("コノ ギョウニ `![](アタラシイ ナマエ,イマノ ナマエ)` ノ カタチガ アリマセン。");
+        bail!("コノ行ニ `![](新シイ名前,今ノ名前)` ノ 形ガ アリマセン。");
     }
 
     let dest_dir = images::dir(cfg, md);
@@ -103,10 +103,10 @@ pub fn run_with(env: &ZedEnv, cfg: Option<&Config>) -> Result<String> {
     let mut seen = HashSet::new();
     for plan in &plans {
         if !seen.insert(&plan.new_name) {
-            bail!("オナジ アタラシイ ナマエガ 2カイ アリマス：{}", plan.new_name);
+            bail!("同ジ 新シイ名前ガ 2回 アリマス：{}", plan.new_name);
         }
         if dest_dir.join(&plan.new_name).exists() {
-            bail!("{} ハ スデニ アリマス。", dest_dir.join(&plan.new_name).display());
+            bail!("{} ハ 既ニ アリマス。", dest_dir.join(&plan.new_name).display());
         }
     }
 
@@ -170,15 +170,15 @@ mod tests {
         let p = resolve(&pair("neko.png", "image.png"), exists_in(&["image.png"])).unwrap();
         assert_eq!(p.new_name, "neko.png");
         let e = resolve(&pair("neko.jpg", "image.png"), exists_in(&["image.png"])).unwrap_err();
-        assert!(e.to_string().contains("カクチョウシ"));
+        assert!(e.to_string().contains("拡張子"));
     }
 
     #[test]
     fn 両方無い_両方ある_既にある_使えない文字() {
-        assert!(resolve(&pair("neko", "image.png"), exists_in(&[])).unwrap_err().to_string().contains("ミツカリマセン"));
-        assert!(resolve(&pair("a.png", "b.png"), exists_in(&["a.png", "b.png"])).unwrap_err().to_string().contains("リョウホウ"));
-        assert!(resolve(&pair("neko", "image.png"), exists_in(&["image.png", "neko.png"])).unwrap_err().to_string().contains("スデニ アリマス"));
-        assert!(resolve(&pair("ねこ", "image.png"), exists_in(&["image.png"])).unwrap_err().to_string().contains("ツカエル モジ"));
+        assert!(resolve(&pair("neko", "image.png"), exists_in(&[])).unwrap_err().to_string().contains("見ツカリマセン"));
+        assert!(resolve(&pair("a.png", "b.png"), exists_in(&["a.png", "b.png"])).unwrap_err().to_string().contains("両方"));
+        assert!(resolve(&pair("neko", "image.png"), exists_in(&["image.png", "neko.png"])).unwrap_err().to_string().contains("既ニ アリマス"));
+        assert!(resolve(&pair("ねこ", "image.png"), exists_in(&["image.png"])).unwrap_err().to_string().contains("使エル文字"));
     }
 
     #[test]
@@ -277,6 +277,6 @@ mod tests {
         let md = t.path().join("!.md");
         fs::write(&md, "a\n").unwrap();
         let e = run_with(&env_at(md, 99, ""), None).unwrap_err();
-        assert!(e.to_string().contains("カタチガ アリマセン"));
+        assert!(e.to_string().contains("形ガ アリマセン"));
     }
 }

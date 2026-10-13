@@ -45,7 +45,7 @@ fn run() -> anyhow::Result<String> {
         Command::Paste => paste::run(&env),
         Command::Rename => rename::run(&env),
         Command::Open { name, today, project } => {
-            open::run(name, today, project, &env, || win::input_box("pon — ナマエ"))
+            open::run(name, today, project, &env, || win::input_box("pon — 名前"))
         }
     }
 }
