@@ -6,6 +6,7 @@ mod config;
 mod images;
 mod markdown;
 mod names;
+mod pages;
 mod paste;
 mod rename;
 mod zed_env;
