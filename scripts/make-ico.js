@@ -1,7 +1,7 @@
 // SVG から PNG 入りの .ico を作る（16〜256px）。
 //
 // sharp が要る。このリポジトリには node の依存が無いので、sharp のある node_modules を NODE_PATH で指す:
-//   NODE_PATH=D:/blog/node_modules node scripts/make-ico.js assets/icon-error.svg assets/icon-error.ico
+//   NODE_PATH=path/to/node_modules node scripts/make-ico.js assets/icon-error.svg assets/icon-error.ico
 const fs = require("fs");
 const sharp = require("sharp");
 

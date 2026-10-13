@@ -1,7 +1,7 @@
 # pon v2 設計
 
 2026-10-13。Zed で Markdown を書くときの、画像と新規ページの手間を消す道具。
-blog（ブログ、`!/{slug}/!.md`）と notes（メモ、md 平置き）の両方で使う。
+ブログ型（ページごとにフォルダを持ち、画像もそこに置く）と、メモ型（md を直下に平置き、画像は `images/<名前>/`）の両方で使う。
 
 旧 pon から引き継ぐのは **名前とロゴ（`assets/`）だけ**。コード・構成・作法は引き継がない。
 
@@ -57,7 +57,7 @@ title: $1
 """
 ```
 
-notes は `[images] dir = "images/{stem}"` と `[[pages]] match = '^(.+)$' / path = "$1.md"` の 2 つで済む。
+メモ型は `[images] dir = "images/{stem}"` と `[[pages]] match = '^(.+)$' / path = "$1.md"` の 2 つで済む。
 
 ### `pon paste`
 
@@ -69,7 +69,7 @@ notes は `[images] dir = "images/{stem}"` と `[[pages]] match = '^(.+)$' / pat
 
 ### `pon rename`
 
-TypeScript 試作（blog の `scripts/rename-image.ts`）の仕様を写す。
+先に作った TypeScript 試作の仕様を写す。
 
 1. 対象の行は `ZED_SELECTED_TEXT` があればその中の全行、無ければ `ZED_ROW` の行。
 2. 行から `![alt](a,b)` を拾う（カンマ前後の空白は無視）。無ければ止まる。
@@ -105,13 +105,13 @@ System → Open の path 欄に exe と引数を直接書く。`.vbs` も `.lnk`
 
 - 今日：`pon.exe open --today --project D:\notes`
 - 名前：`pon.exe open --project D:\notes`（入力窓が出る）
-- 決まったページ：`… open アイデア --project D:\notes`
+- 決まったページ：`… open ideas --project D:\notes`
 
 アイコンは `assets/icon-streamdeck*.png`。
 
 ## ビルドと配置
 
-- `cargo install --path .` で `pon.exe`（cargo home は `%CARGO_HOME%`）。PATH 済みなのでタスクは `pon` と書くだけ。
+- `cargo install --path .` で cargo の bin フォルダに入る。PATH 済みなのでタスクは `pon` と書くだけ。
 - release はサイズと起動を優先（`opt-level`、`lto`、`panic = "abort"`、`strip`）。
 - exe のアイコンに `assets/icon.ico` を埋める。失敗窓のアイコン `assets/icon-error.ico` も ID 2 で埋める（`icon-error.svg` は `icon.svg` の色違いで、小さく出るので余白を詰めてある。ico は 16〜256px の PNG 入り）。
 
@@ -132,6 +132,6 @@ System → Open の path 欄に exe と引数を直接書く。`.vbs` も `.lnk`
 
 ## 範囲外
 
-- `other.toml` のように md 以外から画像を指す設定の書き換え。
+- md 以外の設定ファイルから画像を指している場合の書き換え。
 - 人向けの CLI（ヘルプの体裁、対話）。
 - Zed 本体の `ctrl+v` 貼り付けの置き換え（共存する。そちらで貼った物は `rename` で直す）。

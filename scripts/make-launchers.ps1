@@ -5,20 +5,25 @@
 # ボタンの App/File 欄には、参照ボタンで選ばず、.lnk のフルパスを手で打つこと
 # （参照で選ぶと exe 本体に解決されて引数が落ちる）。
 #
+# 一覧はリポジトリ直下の launchers.json（Git には入れない）に書く。無ければ下の例を使う。
+#   [ { "name": "notes-today", "args": "open --today --project D:\\notes" }, ... ]
+#
 # 使い方:  powershell -NoProfile -File scripts\make-launchers.ps1
-# 直したいときは下の $buttons を編集して、もう一度実行する。
 
-$exe = "pon.exe"
-$out = Join-Path $PSScriptRoot "..\launchers"
+$exe = (Get-Command pon -ErrorAction Stop).Source
+$root = Resolve-Path (Join-Path $PSScriptRoot "..")
+$out = Join-Path $root "launchers"
 New-Item -ItemType Directory -Force $out | Out-Null
-$out = (Resolve-Path $out).Path
 
-$buttons = @(
-    @{ name = "notes-today";       args = "open --today --project D:\notes" },
-    @{ name = "notes-name";        args = "open --project D:\notes" },
-    @{ name = "blog-today";  args = "open --today --project D:\blog" },
-    @{ name = "blog-name";   args = "open --project D:\blog" }
-)
+$listFile = Join-Path $root "launchers.json"
+if (Test-Path $listFile) {
+    $buttons = Get-Content -Raw -Encoding UTF8 $listFile | ConvertFrom-Json
+} else {
+    $buttons = @(
+        [pscustomobject]@{ name = "notes-today"; args = "open --today --project D:\notes" },
+        [pscustomobject]@{ name = "notes-name";  args = "open --project D:\notes" }
+    )
+}
 
 $shell = New-Object -ComObject WScript.Shell
 foreach ($b in $buttons) {

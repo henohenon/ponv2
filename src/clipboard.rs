@@ -38,7 +38,7 @@ fn dib_as_png() -> Result<Vec<u8>> {
         let mut enc = png::Encoder::new(&mut out, img.width as u32, img.height as u32);
         enc.set_color(png::ColorType::Rgba);
         enc.set_depth(png::BitDepth::Eight);
-        // 速さ優先。ビルド側が webp に変換し直すので、ここで縮めても意味が薄い。
+        // 速さ優先。サイトのビルドが webp などに変換し直すことが多いので、ここで縮めても意味が薄い。
         enc.set_compression(png::Compression::Fast);
         let mut w = enc.write_header().context("PNG ノ ヘッダヲ 書ケマセン。")?;
         w.write_image_data(&img.bytes).context("PNG ヲ 書ケマセン。")?;

@@ -56,6 +56,6 @@ mod tests {
         let md = Path::new("D:/notes/2026-10-13.md");
         assert_eq!(link_for(md, Path::new("D:/notes/images/2026-10-13/neko.png")).unwrap(), "images/2026-10-13/neko.png");
         assert_eq!(link_for(md, Path::new("D:/notes/neko.png")).unwrap(), "neko.png");
-        assert_eq!(link_for(Path::new("D:/notes/Kiosk/a.md"), Path::new("D:/notes/images/a/x.png")).unwrap(), "../images/a/x.png");
+        assert_eq!(link_for(Path::new("D:/notes/sub/a.md"), Path::new("D:/notes/images/a/x.png")).unwrap(), "../images/a/x.png");
     }
 }
